@@ -15,13 +15,24 @@ $test: #fff;
 
 .test-heading-wrap {
   width: 100%;
-  height: 80vh;
+  height: 700px;
   overflow: hidden;
+  position: relative;
+}
+
+.test-image-heading {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .test-image {
   width: 100%;
-  height: 100%;
   display: block;
   outline: 1px solid transparent;
 }
@@ -34,7 +45,7 @@ $test: #fff;
 
   &-1 {
     background-color: #000;
-    top: 800px;
+    top: 900px;
     left: 400px;
   }
 
@@ -46,7 +57,7 @@ $test: #fff;
 
   &-3 {
     background-color: #040;
-    top: 700px;
+    top: 900px;
     left: 500px;
   }
 }
@@ -59,7 +70,7 @@ $test: #fff;
   &::before {
     content: '';
     display: block;
-    padding-top: 50%;
+    padding-top: 40%;
   }
 }
 

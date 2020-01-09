@@ -17,7 +17,7 @@ export default class NormalParallax {
    * @param {Function} [options.isSP=noop] - spの場合の処理を受け取る
    */
 
-  constructor(target, options = {}) {
+  constructor (target, options = {}) {
     this._els = getElements(target);
     if (this._els.length === 0) {
       this._disabled = true;
@@ -59,10 +59,7 @@ export default class NormalParallax {
     autoRun && this.run();
   }
 
-  /**
-   *
-   */
-  _cache() {
+  _cache () {
     this._isSpCurrent = this._isSP();
     this._speed = this._isSpCurrent ? this._speedSp : this._speedPc;
     this._speed *= window.innerWidth / window.innerHeight;
@@ -82,7 +79,7 @@ export default class NormalParallax {
       .filter(item => item);
   }
 
-  _tick() {
+  _tick () {
     const scrollTop = this._scrollTarget.scrollTop;
     if (scrollTop !== this._scrollTop) {
       // When the scroll position changes
@@ -90,12 +87,10 @@ export default class NormalParallax {
       this._update();
     }
 
-    this._animationFrameId = requestAnimationFrame(() => {
-      this._tick();
-    });
+    this._animationFrameId = requestAnimationFrame(() => this._tick());
   }
 
-  _update() {
+  _update () {
     this._centerViewport = this._scrollTop + this._windowHeight / 2;
 
     this._items.forEach(item => this._updateElement(item));
@@ -103,18 +98,18 @@ export default class NormalParallax {
     this._optionOnScroll(this._scrollTop);
   }
 
-  _getTransform(position) {
+  _getTransform (position) {
     return `translate3d(0, ${position}px, 0)`;
   }
 
-  _getTransformRound(position) {
+  _getTransformRound (position) {
     return `translate3d(0, ${Math.round(position)}px, 0)`;
   }
 
   /**
    * Cache various values of one element
    */
-  _cacheElementPos(el, scrollY) {
+  _cacheElementPos (el, scrollY) {
     // Do not parallax if it is specified to invalidate by SP
     if (this._isSpCurrent && el.dataset.sp === 'false') return;
 
@@ -131,9 +126,10 @@ export default class NormalParallax {
     };
   }
 
-  _updateElement(item) {
+  _updateElement (item) {
     if (this._scrollTop > item.outPos) {
       // 見なくなった後の処理を記入
+      console.log('見えないよ');
     } else if (this._scrollTop > item.inPos) {
       // ここでパララックスの処理をしている
 
@@ -145,7 +141,7 @@ export default class NormalParallax {
       item.el.style.transform = this[this._fTansform](position);
     }
   }
-  run() {
+  run () {
     if (this._disabled) return;
 
     this._cache();
@@ -154,14 +150,14 @@ export default class NormalParallax {
     });
   }
 
-  update() {
+  update () {
     if (this._disabled) return;
 
     this._cache();
     this._update();
   }
 
-  destroy() {
+  destroy () {
     if (!this._els) return;
 
     cancelAnimationFrame(this._animationFrameId);

@@ -17,7 +17,7 @@ export default class BackgroundParallax {
    *  <div data-speed='-0.3'></div>
    */
 
-  constructor(target, options = {}) {
+  constructor (target, options = {}) {
     this._els = getElements(target); // 指定されたDOMをここに格納
 
     // 指定されたDOMの有無を確認。
@@ -37,38 +37,21 @@ export default class BackgroundParallax {
     this._optionOnScroll = onScroll;
     this._fTansform = `_getTransform${isRound ? 'Round' : ''}`;
     this._scrollTarget = document.scrollingElement || document.documentElement;
+    this.viewport = this.scrollY + window.innerHeight; // windowが見える範囲
+    this.scrollY = window.scrollY || window.pageYOffset;
 
-    this._onResize = () => {
-      this.update();
-      this._optionOnResize(this._windowHeight);
-    };
     window.addEventListener('resize', this._onResize);
-
-    this._onLoad = () => {
-      this.update();
-    };
-
     window.addEventListener('load', this._onLoad);
 
-    autoRun && this.run();
-  }
-
-  /**
-   * データを更新させる
-   */
-  update() {
-    if (this._disabled) return;
-
     this._cache();
-    this._update();
+    this._tick();
   }
 
   /**
    * willChange、高さなどの値をキャッシュをさせる
    */
-  _cache() {
+  _cache () {
     this._windowHeight = window.innerHeight;
-    const scrollY = window.scrollY || window.pageYOffset;
 
     // domを格納
     this._items = this._els.map(el => {
@@ -80,39 +63,36 @@ export default class BackgroundParallax {
       if (!(willChange === 'auto' || willChange === 'transform'))
         el.style.willChange += ', ' + willChange;
 
-      return this._cacheElementPos(el, scrollY);
+      return this._cacheElementPos(el);
     });
   }
 
   /**
    * _cacheから送られてくるデータを返す
    * @param {HTMLElements} el パララックでつかDOM
-   * @param {number} scrollY windowの高さ
    */
-  _cacheElementPos(el, scrollY) {
+  _cacheElementPos (el) {
     const bounding = el.getBoundingClientRect(); // パララックス対象のDOMのcssを取得
-    const boundingParent = el.parentNode.getBoundingClientRect(); // パララックス対象のDOMを囲ってるDOMのcssを取得
-    const top = boundingParent.top + scrollY; // 要素の正しい高さを取得
-    const inPos = top - this._windowHeight; // ウインドウの高さと要素の高さを引いた分
-    const outPos = boundingParent.bottom + scrollY; // 要素の正しい底辺の高さを取得
+    const parent = el.parentNode.getBoundingClientRect(); // パララックス対象のDOMを囲ってるDOMのcssを取得
+    const top = parent.top + this.scrollY; // 要素の正しい高さを取得
 
     return {
       el,
-      max: boundingParent.height - bounding.height, // 親のDOMとparallaxにDOMの差分を抽出
-      inPos,
-      outPos,
-      distance: outPos - inPos,
-      offset: boundingParent.top - bounding.top
+      top,
+      bottom: top + parent.height,
+      max: parent.height - bounding.height // 親のDOMとparallaxにDOMの差分を抽出
     };
   }
 
   /**
    * 高さを撮り続け、処理を走らせる
    */
-  _tick() {
+  _tick () {
     const scrollTop = this._scrollTarget.scrollTop;
 
     if (scrollTop !== this._scrollTop) {
+      this.scrollY = window.scrollY || window.pageYOffset;
+      this.viewport = this.scrollY + window.innerHeight;
       this._scrollTop = scrollTop;
       this._update();
     }
@@ -125,70 +105,24 @@ export default class BackgroundParallax {
   /**
    * domを更新させてる
    */
-  _update() {
+  _update () {
     this._items.forEach(item => this._updateElement(item));
-
-    this._optionOnScroll(this._scrollTop);
   }
 
   /**
    * ここでパララックスの処理をさせている
    */
-  _updateElement(item) {
-    if (this._scrollTop > item.outPos) {
-      // 見なくなった後の処理
-    } else {
+  _updateElement (item) {
+    if (this._scrollTop > item.bottom || this.viewport < item.top) {
+      // 見なくなった後の処理を記入
+    } else if (this.viewport > item.top && this._scrollTop < item.bottom) {
       // ここでパララックスの計算をしている
-      const diff = this._scrollTop - item.inPos;
+      const scroll = this.viewport - item.top; // 見える部分からのスクロール値
+      const max = window.innerHeight + item.el.parentNode.clientHeight; // 見える部分の最大スクロール値
+      const rate = scroll / max; // 移動値の%を算出
+      const position = item.max * rate; // 移動値を算出
 
-      if (diff > 0) {
-        const rate = diff / item.distance;
-
-        const position = item.offset + item.max - item.max * rate; // max - (max - min) * rate
-
-        item.el.style.transform = this[this._fTansform](position);
-      }
+      item.el.style.transform = `translate3d(0, ${position}px, 0)`;
     }
-  }
-
-  /**
-   * translateを格納
-   */
-  _getTransform(position) {
-    return `translate3d(0, ${position}px, 0)`;
-  }
-
-  /**
-   * 四捨五入をしたtranslateの値を返す
-   */
-  _getTransformRound(position) {
-    return `translate3d(0, ${Math.round(position)}px, 0)`;
-  }
-
-  /**
-   * パララックスを発火
-   */
-  run() {
-    if (this._disabled) return;
-
-    this._cache();
-    this._animationFrameId = requestAnimationFrame(() => this._tick());
-  }
-
-  /**
-   * 要素を削除
-   */
-  destroy() {
-    if (!this._els) return;
-
-    cancelAnimationFrame(this._animationFrameId);
-
-    this._els.forEach(el => {
-      el.style.transform = null;
-      el.style.willChange = null;
-    });
-
-    window.removeEventListener('resize', this._onResize);
-    window.removeEventListener('load', this._onLoad);
   }
 }
