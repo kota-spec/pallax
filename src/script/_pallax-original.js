@@ -1,28 +1,28 @@
 export default class PallaxOriginal {
   constructor (target) {
-    this.els = this.getElements(target);
+    this.els = this._getElements(target);
 
-    this.speed = 0.1;
-    this.scrollY = window.scrollY || window.pageYOffset;
+    this._speed = 0.1;
+    this._scrollY = window.scrollY || window.pageYOffset;
     this._scrollTop = 0;
-    this.items = null; // domの色んな状態を格納
+    this._items = null; // domの色んな状態を格納
     this._scrollTarget = document.scrollingElement || document.documentElement;
-    this.viewport = this.scrollY + window.innerHeight; // windowが見える範囲
+    this._viewport = this._scrollY + window.innerHeight; // windowが見える範囲
   }
 
   init () {
-    this.cache();
-    this.update();
-    this.tick();
+    this._cache();
+    this._update();
+    this._tick();
   }
 
   // willchangeなどをつける
-  cache () {
-    this.speed *= window.innerWidth / window.innerHeight;
+  _cache () {
+    this._speed *= window.innerWidth / window.innerHeight;
     this._windowHeight = window.innerHeight;
     const scrollY = window.scrollY || window.pageYOffset;
 
-    this.items = this.els
+    this._items = this.els
       .map(el => {
         el.style.transform = 'none';
         const willChange = window.getComputedStyle(el).willChange;
@@ -31,13 +31,13 @@ export default class PallaxOriginal {
           el.style.willChange += ', ' + willChange;
         }
 
-        return this.cacheElementPos(el, scrollY);
+        return this._cacheElementPos(el, scrollY);
       })
       .filter(item => item);
   }
 
   // domの色々な情報を格納
-  cacheElementPos (el, scrollY) {
+  _cacheElementPos (el, scrollY) {
     const bounding = el.getBoundingClientRect();
     const top = bounding.top + scrollY; // 純粋なtopの高さ
 
@@ -53,32 +53,32 @@ export default class PallaxOriginal {
   }
 
   // スクロールをしたかどうか検知
-  tick () {
+  _tick () {
     const scrollTop = this._scrollTarget.scrollTop;
     if (scrollTop !== this._scrollTop) {
-      this.scrollY = window.scrollY || window.pageYOffset;
-      this.viewport = this.scrollY + window.innerHeight;
+      this._scrollY = window.scrollY || window.pageYOffset;
+      this._viewport = this._scrollY + window.innerHeight;
       this._scrollTop = scrollTop;
-      this.update();
+      this._update();
     }
 
-    this._animationFrameId = requestAnimationFrame(() => this.tick());
+    this._animationFrameId = requestAnimationFrame(() => this._tick());
   }
 
   // domの位置を更新
-  update () {
-    this.items.forEach(item => this.updateElement(item));
+  _update () {
+    this._items.forEach(item => this._updateElement(item));
   }
 
   // パララックスの処理
-  updateElement (item) {
-    if (this._scrollTop > item.center || this.viewport < item.center) {
+  _updateElement (item) {
+    if (this._scrollTop > item.center || this._viewport < item.center) {
       // 見なくなった後の処理を記入
-    } else if (this.viewport > item.center && this._scrollTop < item.center) {
+    } else if (this._viewport > item.center && this._scrollTop < item.center) {
       // ここでパララックスの処理をしている
 
       // domの位置を更新
-      const position = (this.viewport - item.center) * item.speed;
+      const position = (this._viewport - item.center) * item.speed;
 
       if (position <= 300) {
         item.position = position;
@@ -91,7 +91,7 @@ export default class PallaxOriginal {
    * domの入った配列を返す
    * @param {NodeList} nodeList NodeListをただのarrayに変換
    */
-  makeArray (nodeList) {
+  _makeArray (nodeList) {
     return nodeList ? Array.prototype.slice.call(nodeList, 0) : [];
   }
 
@@ -100,18 +100,18 @@ export default class PallaxOriginal {
    * @param {string|NodeList|Element|Element[]} target
    * @param {string} context 親のdom
    */
-  getElements (target, context = document) {
+  _getElements (target, context = document) {
     if (typeof target === 'string') {
       // string
       const nodeList = context.querySelectorAll(target);
-      return this.makeArray(nodeList);
+      return this._makeArray(nodeList);
     } else if (target.length) {
       if (target.map) {
         // Array
         return target;
       } else {
         // NodeList
-        return this.makeArray(target);
+        return this._makeArray(target);
       }
     } else {
       // Element
