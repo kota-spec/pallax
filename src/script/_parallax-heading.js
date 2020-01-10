@@ -1,9 +1,17 @@
 export default class ParallaxHeading {
   /**
-   * @param {string|Element|} target - DOMの要素を取得
+   * @param {string|Element} target DOMの要素を取得
+   * @param {Object} [options={}]
+   * @param {speed} [options.speed=number] 移動スピード
+   * @param {aspect} [options.aspect=number] 画像のアスペクト比 1 ~ 0.0
    */
 
-  constructor (target) {
+  constructor (target, options = {}) {
+    const { speed = 1, aspect = 0.66 } = options;
+
+    // private
+    this._speed = speed; // 移動スピード
+    this._aspect = aspect; // 画像のアスペクト比
     this._$$headingWrap = this._getElements(target); // 親のdomを取得
     this._parentWidth = 0; // 親domの高さ
     this._scrollY = window.scrollY || window.pageYOffset; //スクロールの値を格納
@@ -27,6 +35,8 @@ export default class ParallaxHeading {
 
   // リサイズ処理
   _onResize () {
+    this._scrollY = window.scrollY || window.pageYOffset;
+
     this._setAspect();
     this._setOriginalHeight();
   }
@@ -44,20 +54,20 @@ export default class ParallaxHeading {
 
   // スクロールイベント
   _onScroll () {
-    const progress = 1 - this._scrollY / this._originalHeight; // 進行具合を計算
+    const progress = 1 - (this._scrollY * this._speed) / this._originalHeight; // 進行具合を計算
     this._$$headingWrap.style.height = `${this._originalHeight * progress}px`; // 徐々に高さを変化させる
   }
 
   // 純粋なheightの高さを格納
   _setOriginalHeight () {
-    const height = this._$$headingWrap.clientHeight + this._scrollY;
+    const height = this._$$headingWrap.clientWidth * this._aspect;
     this._originalHeight = height;
   }
 
   // アスペクト比にそった高さのスタイルをつける
   _setAspect () {
     this._parentWidth = this._$$headingWrap.clientWidth;
-    this._$$headingWrap.style.height = `${this._parentWidth * 0.66 -
+    this._$$headingWrap.style.height = `${this._parentWidth * this._aspect -
       this._scrollY}px`;
   }
 
