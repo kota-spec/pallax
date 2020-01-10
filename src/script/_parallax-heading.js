@@ -1,4 +1,8 @@
 export default class ParallaxHeading {
+  /**
+   * @param {string|Element|} target - DOMの要素を取得
+   */
+
   constructor (target) {
     this.$$headingWrap = this.getElements(target); // 親のdomを取得
     this.parentWidth = 0; // 親domの高さ
