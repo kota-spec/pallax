@@ -1,6 +1,6 @@
 import ParallaxBackground from './_parallax-background';
 import ParallaxNormal from './_parallax-normal';
-import PallaxHeading from './_parallax-heading';
+import ParallaxHeading from './_parallax-heading';
 
 (() => {
   window.addEventListener('DOMContentLoaded', () => {
@@ -8,11 +8,11 @@ import PallaxHeading from './_parallax-heading';
     const $$dom = document.querySelectorAll('.js-test-panele');
 
     const original = new ParallaxNormal($$dom);
-    const headingPallax = new PallaxHeading('js-test-heading-wrap');
-    const bgPallax = new ParallaxBackground($$bg);
+    const headingParallax = new ParallaxHeading('js-test-heading-wrap');
+    const bgParallax = new ParallaxBackground($$bg);
 
     original.init();
-    headingPallax.init();
-    bgPallax.init();
+    headingParallax.init();
+    bgParallax.init();
   });
 })();
