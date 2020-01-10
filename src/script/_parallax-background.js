@@ -1,4 +1,4 @@
-export default class BackgroundParallax {
+export default class ParallaxBackground {
   /**
    * @param {string|NodeList|Element|Element[]} target - DOMの要素を取得
    * @param {Object} [options={}]

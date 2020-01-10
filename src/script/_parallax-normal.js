@@ -1,19 +1,30 @@
 export default class PallaxOriginal {
+  /**
+   * @param {string|NodeList|Element|Element[]} target - DOMの要素を取得
+   */
+
   constructor (target) {
     this.els = this._getElements(target);
 
     this._speed = 0.1;
-    this._scrollY = window.scrollY || window.pageYOffset;
-    this._scrollTop = 0;
     this._items = null; // domの色んな状態を格納
     this._scrollTarget = document.scrollingElement || document.documentElement;
-    this._viewport = this._scrollY + window.innerHeight; // windowが見える範囲
+    this._animationFrameId = 0; // requestAnimationFrameを管理
+    this._scrollTop = this._scrollTarget.scrollTop;
+    this._viewport = this._scrollTop + window.innerHeight; // windowが見える範囲
+
+    this._onResize = this._onResize.bind(this);
   }
 
   init () {
     this._cache();
     this._update();
     this._tick();
+    this._onListener();
+  }
+
+  _onListener () {
+    window.addEventListener('resize', this._onResize);
   }
 
   // willchangeなどをつける
@@ -37,9 +48,9 @@ export default class PallaxOriginal {
   }
 
   // domの色々な情報を格納
-  _cacheElementPos (el, scrollY) {
+  _cacheElementPos (el) {
     const bounding = el.getBoundingClientRect();
-    const top = bounding.top + scrollY; // 純粋なtopの高さ
+    const top = bounding.top + this._scrollTop; // 純粋なtopの高さ
 
     return {
       el,
@@ -47,7 +58,7 @@ export default class PallaxOriginal {
       center: top + bounding.height / 2, // domの真ん中からの高さ
       speed: parseFloat(el.dataset.speed) || this._speed,
       inPos: top - this._windowHeight, // domのtopの高さとwindowの高さの差分
-      outPos: bounding.bottom + scrollY, // domの底辺からの高さ
+      outPos: bounding.bottom + this._scrollTop, // domの底辺からの高さ
       position: 0
     };
   }
@@ -56,18 +67,38 @@ export default class PallaxOriginal {
   _tick () {
     const scrollTop = this._scrollTarget.scrollTop;
     if (scrollTop !== this._scrollTop) {
-      this._scrollY = window.scrollY || window.pageYOffset;
-      this._viewport = this._scrollY + window.innerHeight;
       this._scrollTop = scrollTop;
-      this._update();
+      this._updateData();
     }
 
     this._animationFrameId = requestAnimationFrame(() => this._tick());
   }
 
+  // データを更新
+  _updateData () {
+    this._viewport = this._scrollTop + window.innerHeight;
+
+    this._items.map(r => {
+      const bounding = r.el.getBoundingClientRect();
+      const top = bounding.top + this._scrollTop; // 純粋なtopの高さ
+
+      r.top = top; // 要素の正しい高さを取得
+      r.center = top + bounding.height / 2;
+
+      return r;
+    });
+
+    this._update();
+  }
+
   // domの位置を更新
   _update () {
     this._items.forEach(item => this._updateElement(item));
+  }
+
+  // リサイズ処理
+  _onResize () {
+    this._updateData();
   }
 
   // パララックスの処理

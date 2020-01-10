@@ -1,4 +1,4 @@
-import { getElements } from './modules/utility';
+import { getElements } from '../modules/utility';
 
 /**
  * Parallax library

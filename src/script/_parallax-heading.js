@@ -1,9 +1,9 @@
-export default class HeadingPallax {
+export default class ParallaxHeading {
   constructor (target) {
     this.$$headingWrap = this.getElements(target); // 親のdomを取得
     this.parentWidth = 0; // 親domの高さ
     this.scrollY = window.scrollY || window.pageYOffset; //スクロールの値を格納
-    this._animationFrameId = 0; // requestAnimationFrameを作成
+    this._animationFrameId = 0; // requestAnimationFrameを管理
     this.originalHeight = this.$$headingWrap.clientHeight; // 純粋のdomの高さ
 
     // bind系
