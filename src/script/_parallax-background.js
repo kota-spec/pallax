@@ -8,9 +8,10 @@ export default class ParallaxBackground {
 
   constructor (target, options = {}) {
     this._els = this._getElements(target); // 指定されたDOMをここに格納
+    const { speed = 1, onResize = () => null, onScroll = () => null } = options;
 
-    const { onResize = () => null, onScroll = () => null } = options;
-
+    // private
+    this._speed = speed; // パララックスの移動速度
     this._optionOnResize = onResize; // リサイズ時に発火させたい処理を受け取る
     this._optionOnScroll = onScroll; // スクロール時に発火させたい処理を受け取る
     this._scrollTarget = document.scrollingElement || document.documentElement;
@@ -108,7 +109,8 @@ export default class ParallaxBackground {
       const scroll = this._viewport - item.top; // 見える部分からのスクロール値
       const max = window.innerHeight + item.el.parentNode.clientHeight; // 見える部分の最大スクロール値
       const rate = scroll / max; // 移動値の%を算出
-      const position = item.max * rate; // 移動値を算出
+      const value = item.max * this._speed * rate; // 移動値を算出
+      const position = -item.max <= -value ? item.max : value; // position設定
 
       item.el.style.transform = `translate3d(0, ${position}px, 0)`;
     }

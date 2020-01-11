@@ -1,5 +1,6 @@
 export default class PallaxOriginal {
   /**
+   * 移動の振り幅はDOMに`data-speed`を振ってね。
    * @param {string|NodeList|Element|Element[]} target - DOMの要素を取得
    */
 

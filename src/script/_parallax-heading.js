@@ -4,15 +4,17 @@ export default class ParallaxHeading {
    * @param {Object} [options={}]
    * @param {speed} [options.speed=number] 移動スピード
    * @param {aspect} [options.aspect=number] 画像のアスペクト比 1 ~ 0.0
+   * @param {isAspect} [options.isAspect=boolean] アスペクト比合わせて高さを変動させるかどうか
    */
 
   constructor (target, options = {}) {
-    const { speed = 1, aspect = 0.66 } = options;
+    const { speed = 1.5, aspect = 0.66, isAspect = true } = options;
 
     // private
+    this._$$headingWrap = this._getElements(target); // 親のdomを取得
     this._speed = speed; // 移動スピード
     this._aspect = aspect; // 画像のアスペクト比
-    this._$$headingWrap = this._getElements(target); // 親のdomを取得
+    this._isAspect = isAspect; // アスペクト比合わせて高さを変動させるかどうか
     this._parentWidth = 0; // 親domの高さ
     this._scrollY = window.scrollY || window.pageYOffset; //スクロールの値を格納
     this._animationFrameId = 0; // requestAnimationFrameを管理
@@ -23,7 +25,10 @@ export default class ParallaxHeading {
   }
 
   init () {
-    this._setAspect();
+    if (this._isAspect) {
+      this._setAspect();
+    }
+
     this._setOriginalHeight();
     this._onListener();
   }
@@ -37,8 +42,10 @@ export default class ParallaxHeading {
   _onResize () {
     this._scrollY = window.scrollY || window.pageYOffset;
 
-    this._setAspect();
-    this._setOriginalHeight();
+    if (this._isAspect) {
+      this._setAspect();
+      this._setOriginalHeight();
+    }
   }
 
   // 繰り返し処理をさせる
@@ -60,7 +67,14 @@ export default class ParallaxHeading {
 
   // 純粋なheightの高さを格納
   _setOriginalHeight () {
-    const height = this._$$headingWrap.clientWidth * this._aspect;
+    let height = 0;
+
+    if (this._isAspect) {
+      height = this._$$headingWrap.clientWidth * this._aspect;
+    } else {
+      height = this._$$headingWrap.clientHeight;
+    }
+
     this._originalHeight = height;
   }
 
