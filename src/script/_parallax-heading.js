@@ -85,6 +85,12 @@ export default class ParallaxHeading {
       this._scrollY}px`;
   }
 
+  // イベントを削除
+  destory () {
+    cancelAnimationFrame(this._animationFrameId);
+    window.removeEventListener('resize', this._onResize);
+  }
+
   /**
    * domを取得
    * @param {string|Element} target

@@ -119,6 +119,12 @@ export default class PallaxOriginal {
     }
   }
 
+  // イベントを削除
+  destory () {
+    cancelAnimationFrame(this._animationFrameId);
+    window.removeEventListener('resize', this._onResize);
+  }
+
   /**
    * domの入った配列を返す
    * @param {NodeList} nodeList NodeListをただのarrayに変換
